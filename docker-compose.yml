@@ -1,0 +1,34 @@
+version: '3'
+services:
+  web:
+    restart: always
+    build: ./web
+    expose:
+      - "8000"
+    volumes:
+      - data:/usr/src/app/db
+    environment:
+      DEBUG: 'false'
+    command: gunicorn EpPos2.wsgi:application -w 2 -b :8000
+    networks:
+      - backlink
+  
+  nginx:
+    restart: always
+    build: ./docker/nginx/
+    ports:
+      - "80:80"
+    links:
+      - web:web
+    networks:
+      - backlink
+    depends_on:
+      - web
+
+volumes:
+  data:
+    driver: local
+
+networks:
+  backlink:
+    driver: bridge
